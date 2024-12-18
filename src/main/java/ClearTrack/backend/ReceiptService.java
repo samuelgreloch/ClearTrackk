@@ -1,4 +1,4 @@
-package ClearTrack.backend;
+/*package ClearTrack.backend;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,4 +21,4 @@ public class ReceiptService {
     public Receipt saveReceipt(Receipt receipt) {
         return receiptRepository.save(receipt); // Saves a receipt to the database
     }
-}
+}*/

@@ -7,23 +7,24 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/receipts")
 public class ReceiptController {
 
-    private final ReceiptService receiptService;
-
     @Autowired
-    public ReceiptController(ReceiptService receiptService) {
-        this.receiptService = receiptService;
+    private ReceiptRepository receiptRepository;
+
+    @GetMapping("/")
+    public String displayChartPage() {
+        return "Welcome to ClearTrack";
     }
 
-    @GetMapping
+    @GetMapping(value = "/receipts")
     public List<Receipt> getReceipts() {
-        return receiptService.getAllReceipts();
+        return receiptRepository.findAll();
     }
 
-    @PostMapping
-    public Receipt createReceipt(@RequestBody Receipt receipt) {
-        return receiptService.saveReceipt(receipt);
+    @PostMapping(value = "/save")
+    public String saveReceipt(@RequestBody Receipt receipt) {
+        receiptRepository.save(receipt);
+        return "Receipt saved";
     }
 }
