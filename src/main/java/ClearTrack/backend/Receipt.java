@@ -28,6 +28,8 @@ public class Receipt {
 
     @Column
     private double totalPrice;
+
+    @Column
     private LocalDate date;
 
     // Getters and setters
