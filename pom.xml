@@ -45,7 +45,11 @@
 			<version>8.0.33</version>  <!-- Specify version here -->
 			<scope>runtime</scope>
 		</dependency>
-
+		<dependency>
+			<groupId>org.crac</groupId>
+			<artifactId>crac</artifactId>
+			<version>1.5.0</version>
+		</dependency>
 		<!-- Lombok Dependency (used for getter, setters, etc.) -->
 		<dependency>
 			<groupId>org.projectlombok</groupId>
@@ -72,7 +76,11 @@
 			<artifactId>h2</artifactId>
 			<scope>runtime</scope>
 		</dependency>
-	</dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+    </dependencies>
 
 	<build>
 		<plugins>

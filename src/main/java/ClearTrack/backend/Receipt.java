@@ -1,9 +1,5 @@
 package ClearTrack.backend;
-import jakarta.persistence.Table;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 import java.time.LocalDate;
 
@@ -18,10 +14,19 @@ public class Receipt {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column
     private String vendorName;
+
+    @Column
     private String itemName;
+
+    @Column
     private double price;
+
+    @Column
     private int quantity;
+
+    @Column
     private double totalPrice;
     private LocalDate date;
 
