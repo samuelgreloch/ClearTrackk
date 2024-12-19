@@ -38,7 +38,7 @@ public class ReceiptViewController {
     }
 
    // Handle the edit action for a receipt (Display edit form)
-    @PutMapping("/edit/{id}")
+    @GetMapping("/edit/{id}")
     public String showEditForm(@PathVariable long id, Model model) {
         Receipt receipt = receiptRepository.findById(id).orElseThrow();
         model.addAttribute("receipt", receipt);
