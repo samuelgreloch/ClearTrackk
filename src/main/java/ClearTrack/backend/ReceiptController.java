@@ -14,12 +14,12 @@ public class ReceiptController {
     private ReceiptRepository receiptRepository;
 
     // Render the receipts page (HTML)
-    @GetMapping("/")
+  /*  @GetMapping("/")
     public String displayReceiptsPage(Model model) {
         List<Receipt> receipts = receiptRepository.findAll();
         model.addAttribute("receipts", receipts);
         return "index"; // Points to src/main/resources/templates/index.html
-    }
+    }*/
 
     // API Endpoint to fetch receipts (for Postman or other REST clients)
     @GetMapping("/api/receipts")

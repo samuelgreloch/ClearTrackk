@@ -16,7 +16,7 @@ public class ReceiptViewController {
     private ReceiptRepository receiptRepository;
 
     // Render the receipts page (HTML)
-    @GetMapping("/frontend")
+    @GetMapping("/")
     public String displayReceiptsPage(Model model) {
         List<Receipt> receipts = receiptRepository.findAll();
         model.addAttribute("receipts", receipts);
@@ -36,4 +36,28 @@ public class ReceiptViewController {
         receiptRepository.deleteById(id);
         return "redirect:/";  // Redirect to the home page after deleting
     }
+
+   // Handle the edit action for a receipt (Display edit form)
+    @PutMapping("/edit/{id}")
+    public String showEditForm(@PathVariable long id, Model model) {
+        Receipt receipt = receiptRepository.findById(id).orElseThrow();
+        model.addAttribute("receipt", receipt);
+        return "index";  // Using the same index.html to display the form in a modal
+    }
+
+    // Handle the form submission for updating an existing receipt
+    @PostMapping("/update/{id}")
+    public String updateReceipt(@PathVariable long id, @ModelAttribute Receipt receipt) {
+        Receipt existingReceipt = receiptRepository.findById(id).orElseThrow();
+        existingReceipt.setVendorName(receipt.getVendorName());
+        existingReceipt.setItemName(receipt.getItemName());
+        existingReceipt.setPrice(receipt.getPrice());
+        existingReceipt.setQuantity(receipt.getQuantity());
+        existingReceipt.setTotalPrice(receipt.getTotalPrice());
+        existingReceipt.setDate(receipt.getDate());
+
+        receiptRepository.save(existingReceipt);
+        return "redirect:/";  // After updating, redirect to the home page
+    }
+
 }
