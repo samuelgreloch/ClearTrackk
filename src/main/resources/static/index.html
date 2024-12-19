@@ -1,20 +1,92 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+    <title>ClearTrack Receipts</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
 </head>
 <body>
-<p><a href="/hello">Greet the world!</a></p>
+<div class="container my-4">
+    <h1 class="text-center">ClearTrack Receipts</h1>
 
-<form action="/hello" method="GET" id="nameForm">
-    <div>
-        <label for="nameField">How should the app call you?</label>
-        <input name="myName" id="nameField">
-        <button>Greet me!</button>
+    <!-- Button to Add a New Receipt -->
+    <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#addReceiptModal">Add Receipt</button>
+
+    <!-- Table to Display Receipts -->
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Vendor Name</th>
+            <th>Item Name</th>
+            <th>Price</th>
+            <th>Quantity</th>
+            <th>Total Price</th>
+            <th>Date</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="receipt : ${receipts}">
+            <td th:text="${receipt.id}"></td>
+            <td th:text="${receipt.vendorName}"></td>
+            <td th:text="${receipt.itemName}"></td>
+            <td th:text="${receipt.price}"></td>
+            <td th:text="${receipt.quantity}"></td>
+            <td th:text="${receipt.totalPrice}"></td>
+            <td th:text="${receipt.date}"></td>
+            <td>
+                <button class="btn btn-warning btn-sm" th:onclick="'editReceipt(' + ${receipt.id} + ')'">Edit</button>
+                <a class="btn btn-danger btn-sm" th:href="@{'/delete/' + ${receipt.id}}">Delete</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- Modal for Adding Receipt -->
+<div class="modal fade" id="addReceiptModal" tabindex="-1" aria-labelledby="addReceiptModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="/save" method="post">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addReceiptModalLabel">Add New Receipt</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="vendorName" class="form-label">Vendor Name</label>
+                        <input type="text" class="form-control" id="vendorName" name="vendorName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="itemName" class="form-label">Item Name</label>
+                        <input type="text" class="form-control" id="itemName" name="itemName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="price" class="form-label">Price</label>
+                        <input type="number" class="form-control" id="price" name="price" step="0.01" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="quantity" class="form-label">Quantity</label>
+                        <input type="number" class="form-control" id="quantity" name="quantity" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="totalPrice" class="form-label">Total Price</label>
+                        <input type="number" class="form-control" id="totalPrice" name="totalPrice" step="0.01" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="date" class="form-label">Date</label>
+                        <input type="date" class="form-control" id="date" name="date" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save Receipt</button>
+                </div>
+            </form>
+        </div>
     </div>
-</form>
-</body>
-</html>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
