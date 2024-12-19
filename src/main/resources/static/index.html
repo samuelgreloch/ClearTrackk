@@ -26,6 +26,7 @@
         </tr>
         </thead>
         <tbody>
+        <!-- Displaying all receipts dynamically -->
         <tr th:each="receipt : ${receipts}">
             <td th:text="${receipt.id}"></td>
             <td th:text="${receipt.vendorName}"></td>
@@ -35,8 +36,11 @@
             <td th:text="${receipt.totalPrice}"></td>
             <td th:text="${receipt.date}"></td>
             <td>
-                <button class="btn btn-warning btn-sm" th:onclick="'editReceipt(' + ${receipt.id} + ')'">Edit</button>
-                <a class="btn btn-danger btn-sm" th:href="@{'/delete/' + ${receipt.id}}">Delete</a>
+                <!-- Link to edit the receipt -->
+                <button class="btn btn-warning btn-sm" th:onclick="'editReceipt(' + ${receipt.id} + ')'" data-bs-toggle="modal" data-bs-target="#editReceiptModal">Edit</button>
+
+                <!-- Link to delete the receipt -->
+                <a class="btn btn-danger btn-sm" th:href="@{'/api/delete/' + ${receipt.id}}">Delete</a>
             </td>
         </tr>
         </tbody>
@@ -47,7 +51,8 @@
 <div class="modal fade" id="addReceiptModal" tabindex="-1" aria-labelledby="addReceiptModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form action="/save" method="post">
+            <!-- Form for adding a new receipt -->
+            <form action="/api/save" method="post">
                 <div class="modal-header">
                     <h5 class="modal-title" id="addReceiptModalLabel">Add New Receipt</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -81,6 +86,53 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                     <button type="submit" class="btn btn-primary">Save Receipt</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for Editing Receipt -->
+<div class="modal fade" id="editReceiptModal" tabindex="-1" aria-labelledby="editReceiptModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <!-- Form for editing an existing receipt -->
+            <form action="/api/update" method="post">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editReceiptModalLabel">Edit Receipt</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Form fields for editing receipt details -->
+                    <!-- This would be populated dynamically with receipt data for editing -->
+                    <div class="mb-3">
+                        <label for="editVendorName" class="form-label">Vendor Name</label>
+                        <input type="text" class="form-control" id="editVendorName" name="vendorName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editItemName" class="form-label">Item Name</label>
+                        <input type="text" class="form-control" id="editItemName" name="itemName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editPrice" class="form-label">Price</label>
+                        <input type="number" class="form-control" id="editPrice" name="price" step="0.01" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editQuantity" class="form-label">Quantity</label>
+                        <input type="number" class="form-control" id="editQuantity" name="quantity" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editTotalPrice" class="form-label">Total Price</label>
+                        <input type="number" class="form-control" id="editTotalPrice" name="totalPrice" step="0.01" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editDate" class="form-label">Date</label>
+                        <input type="date" class="form-control" id="editDate" name="date" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Update Receipt</button>
                 </div>
             </form>
         </div>
