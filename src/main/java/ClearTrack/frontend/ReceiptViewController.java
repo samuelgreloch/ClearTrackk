@@ -37,7 +37,7 @@ public class ReceiptViewController {
         return "redirect:/";  // Redirect to the home page after deleting
     }
 
-   // Handle the edit action for a receipt (Display edit form)
+    // Handle the edit action for a receipt (Display edit form)
     @GetMapping("/edit/{id}")
     public String showEditForm(@PathVariable long id, Model model) {
         Receipt receipt = receiptRepository.findById(id).orElseThrow();
@@ -60,4 +60,9 @@ public class ReceiptViewController {
         return "redirect:/";  // After updating, redirect to the home page
     }
 
+
+    @GetMapping("/image-to-text")
+    public String imageToText() {
+        return "tesindex";
+    }
 }
