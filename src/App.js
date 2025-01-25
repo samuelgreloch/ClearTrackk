@@ -1,4 +1,3 @@
-// Importing necessary libraries
 import React, { useState, useRef, useCallback } from 'react';
 import Tesseract from 'tesseract.js';
 import Webcam from 'react-webcam';
@@ -7,9 +6,9 @@ import 'chart.js/auto';
 
 function App() {
     const [receipts, setReceipts] = useState([]);
-    const [scanResult, setScanResult] = useState(null);
     const [timeFilter, setTimeFilter] = useState('day');
     const [useWebcam, setUseWebcam] = useState(false);
+    const [editingReceipt, setEditingReceipt] = useState(null); // Track which receipt is being edited
     const webcamRef = useRef(null);
 
     const handleAddReceipt = (event) => {
@@ -22,6 +21,7 @@ function App() {
     const processImage = (image) => {
         Tesseract.recognize(image, 'eng', { logger: (info) => console.log(info) })
             .then(({ data: { text } }) => {
+                console.log("OCR Output:", text); // Log the OCR text for debugging
                 const newReceipt = parseReceipt(text);
                 setReceipts([...receipts, newReceipt]);
             })
@@ -29,21 +29,69 @@ function App() {
     };
 
     const parseReceipt = (text) => {
-        const vendorMatch = text.match(/(.*Restaurant|.*Cafe|.*Diner)/i);
-        const vendorName = vendorMatch ? vendorMatch[0] : 'Unknown Vendor';
+        console.log("Parsed OCR Text:", text);
 
-        const dateMatch = text.match(/\d{2}\/\d{2}\/\d{4}/);
-        const date = dateMatch ? new Date(dateMatch[0]) : new Date();
+        const vendorMatch = text.match(/Vendor[:\s]*(.*?)(\n|$)/i);
+        const vendorName = vendorMatch ? vendorMatch[1].trim() : 'Unknown Vendor';
 
-        const totalMatch = text.match(/TOTAL\s*\$([0-9\.]+)/i);
-        const totalPrice = totalMatch ? parseFloat(totalMatch[1]) : 0;
+        const itemMatch = text.match(/Item[:\s]*(.*?)(\n|$)/i);
+        const itemName = itemMatch ? itemMatch[1].trim() : (() => {
+            const fallback = text.match(/^[A-Za-z\s]+$/gm);
+            return fallback ? fallback[0].trim() : 'Unknown Item';
+        })();
+
+        const priceMatch = text.match(/Price[:\s]*([\d.]+)(\n|$)/i);
+        const price = priceMatch ? parseFloat(priceMatch[1]) : 0;
+
+        const quantityMatch = text.match(/Quantity[:\s]*(\d+)(\n|$)/i);
+        const quantity = quantityMatch ? parseInt(quantityMatch[1]) : 0;
+
+        const totalMatch = text.match(/Total[:\s]*([\d.]+)(\n|$)/i);
+        const totalPrice = totalMatch ? parseFloat(totalMatch[1]) : price * quantity;
+
+        const dateMatch = text.match(/Date[:\s]*(\d{2}[-/\.]\d{2}[-/\.]\d{2,4})(\n|$)/i);
+        const date = dateMatch ? new Date(dateMatch[1]) : new Date();
 
         return {
             vendorName,
-            date,
+            itemName,
+            price,
+            quantity,
             totalPrice,
-            rawText: text,
+            date,
+            rawText: text, // Keep raw text for debugging or additional processing
         };
+    };
+
+    const handleDeleteReceipt = (index) => {
+        const updatedReceipts = receipts.filter((_, i) => i !== index);
+        setReceipts(updatedReceipts);
+    };
+
+    const handleEditReceipt = (index) => {
+        setEditingReceipt({ ...receipts[index], index });
+    };
+
+    const saveEditReceipt = () => {
+        const updatedReceipts = receipts.map((receipt, i) =>
+            i === editingReceipt.index ? editingReceipt : receipt
+        );
+        setReceipts(updatedReceipts);
+        setEditingReceipt(null);
+    };
+
+    const addNewReceipt = () => {
+        setReceipts([
+            ...receipts,
+            {
+                vendorName: 'New Vendor',
+                itemName: 'New Item',
+                price: 0,
+                quantity: 0,
+                totalPrice: 0,
+                date: new Date(),
+            },
+        ]);
     };
 
     const processDataForGraph = () => {
@@ -66,32 +114,26 @@ function App() {
             return false;
         });
 
-        const dataCounts = filteredReceipts.reduce((acc, receipt) => {
-            const date = new Date(receipt.date).toDateString();
-            acc[date] = (acc[date] || 0) + 1;
-            return acc;
-        }, {});
-
-        const totalSales = filteredReceipts.reduce((sum, receipt) => sum + receipt.totalPrice, 0);
-        const totalReceipts = filteredReceipts.length;
+        const priceTrends = receipts.map((receipt) => ({
+            item: receipt.itemName,
+            price: receipt.price,
+            date: receipt.date.toDateString(),
+        }));
 
         return {
             data: {
-                labels: Object.keys(dataCounts),
+                labels: priceTrends.map((entry) => entry.date),
                 datasets: [
                     {
-                        label: 'Receipts Scanned',
-                        data: Object.values(dataCounts),
+                        label: 'Price per Unit',
+                        data: priceTrends.map((entry) => entry.price),
                         backgroundColor: 'rgba(75, 192, 192, 0.2)',
                         borderColor: 'rgba(75, 192, 192, 1)',
                         borderWidth: 1,
                     },
                 ],
             },
-            summary: {
-                totalSales,
-                totalReceipts,
-            },
+            summary: filteredReceipts,
         };
     };
 
@@ -101,7 +143,7 @@ function App() {
             .then((res) => res.blob())
             .then((blob) => processImage(blob))
             .catch((error) => console.error('Error capturing webcam image:', error));
-    }, [webcamRef]);
+    }, [webcamRef, processImage]);
 
     return (
         <div>
@@ -131,27 +173,122 @@ function App() {
                 </div>
             )}
 
-            {scanResult && (
-                <div>
-                    <h2>Scan Result</h2>
-                    <pre>{JSON.stringify(scanResult, null, 2)}</pre>
+            <div>
+                <h2>Receipt Details</h2>
+                <button onClick={addNewReceipt}>Add Receipt</button>
+                <table border="1" style={{ marginBottom: '20px', width: '100%' }}>
+                    <thead>
+                    <tr>
+                        <th>Vendor</th>
+                        <th>Item</th>
+                        <th>Price</th>
+                        <th>Quantity</th>
+                        <th>Total</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {receipts.map((receipt, index) => (
+                        <tr key={index}>
+                            <td>{receipt.vendorName}</td>
+                            <td>{receipt.itemName}</td>
+                            <td>${receipt.price.toFixed(2)}</td>
+                            <td>{receipt.quantity}</td>
+                            <td>${receipt.totalPrice.toFixed(2)}</td>
+                            <td>{receipt.date.toDateString()}</td>
+                            <td>
+                                <button onClick={() => handleDeleteReceipt(index)}>Delete</button>
+                                <button onClick={() => handleEditReceipt(index)}>Edit</button>
+                            </td>
+                        </tr>
+                    ))}
+                    </tbody>
+                </table>
+            </div>
+
+            {editingReceipt && (
+                <div style={{ border: '1px solid #ccc', padding: '10px', marginBottom: '20px' }}>
+                    <h2>Edit Receipt</h2>
+                    <label>
+                        Vendor:
+                        <input
+                            type="text"
+                            value={editingReceipt.vendorName}
+                            onChange={(e) =>
+                                setEditingReceipt({ ...editingReceipt, vendorName: e.target.value })
+                            }
+                        />
+                    </label>
+                    <br />
+                    <label>
+                        Item:
+                        <input
+                            type="text"
+                            value={editingReceipt.itemName}
+                            onChange={(e) =>
+                                setEditingReceipt({ ...editingReceipt, itemName: e.target.value })
+                            }
+                        />
+                    </label>
+                    <br />
+                    <label>
+                        Price:
+                        <input
+                            type="number"
+                            value={editingReceipt.price}
+                            onChange={(e) =>
+                                setEditingReceipt({ ...editingReceipt, price: parseFloat(e.target.value) || 0 })
+                            }
+                        />
+                    </label>
+                    <br />
+                    <label>
+                        Quantity:
+                        <input
+                            type="number"
+                            value={editingReceipt.quantity}
+                            onChange={(e) =>
+                                setEditingReceipt({ ...editingReceipt, quantity: parseInt(e.target.value) || 0 })
+                            }
+                        />
+                    </label>
+                    <br />
+                    <label>
+                        Total:
+                        <input
+                            type="number"
+                            value={editingReceipt.totalPrice}
+                            onChange={(e) =>
+                                setEditingReceipt({
+                                    ...editingReceipt,
+                                    totalPrice: parseFloat(e.target.value) || 0,
+                                })
+                            }
+                        />
+                    </label>
+                    <br />
+                    <label>
+                        Date:
+                        <input
+                            type="date"
+                            value={editingReceipt.date.toISOString().slice(0, 10)}
+                            onChange={(e) =>
+                                setEditingReceipt({
+                                    ...editingReceipt,
+                                    date: new Date(e.target.value),
+                                })
+                            }
+                        />
+                    </label>
+                    <br />
+                    <button onClick={saveEditReceipt}>Save</button>
+                    <button onClick={() => setEditingReceipt(null)}>Cancel</button>
                 </div>
             )}
 
             <div>
-                <h2>Financial Insights</h2>
-                <div style={{ border: '1px solid #ccc', padding: '10px', marginBottom: '20px' }}>
-                    <p>
-                        <strong>Total Sales:</strong> ${processDataForGraph().summary.totalSales.toFixed(2)}
-                    </p>
-                    <p>
-                        <strong>Total Receipts Scanned:</strong> {processDataForGraph().summary.totalReceipts}
-                    </p>
-                </div>
-            </div>
-
-            <div>
-                <h2>Receipts Graph</h2>
+                <h2>Price Trends</h2>
                 <select value={timeFilter} onChange={(e) => setTimeFilter(e.target.value)}>
                     <option value="day">Day</option>
                     <option value="week">Week</option>
