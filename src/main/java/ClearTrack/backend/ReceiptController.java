@@ -59,4 +59,10 @@ public class ReceiptController {
         receiptRepository.delete(deleteReceipt);
         return "Receipt deleted with ID: " + id;
     }
+
+
+
+
+
+
 }

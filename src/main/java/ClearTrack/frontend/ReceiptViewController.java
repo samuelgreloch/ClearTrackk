@@ -1,3 +1,4 @@
+
 package ClearTrack.frontend;
 
 import ClearTrack.backend.Receipt;
@@ -66,3 +67,4 @@ public class ReceiptViewController {
         return "tesindex";
     }
 }
+
