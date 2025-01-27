@@ -18,14 +18,37 @@ function App() {
         }
     };
 
-    const processImage = (image) => {
-        Tesseract.recognize(image, 'eng', { logger: (info) => console.log(info) })
+    const processImage = useCallback((image) => {
+        let imgForOCR;
+        if (image instanceof Blob) {  // Handling image from webcam
+            imgForOCR = image;
+        } else {  // Handling image from file input
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                Tesseract.recognize(e.target.result, 'eng', { logger: (m) => console.log(m) })
+                    .then(({ data: { text } }) => {
+                        const newReceipt = parseReceipt(text);
+                        setReceipts(receipts => [...receipts, newReceipt]);
+                    })
+                    .catch(err => console.error('Error processing image:', err));
+            };
+            reader.readAsDataURL(image);
+            return;
+        }
+        Tesseract.recognize(imgForOCR, 'eng', { logger: (m) => console.log(m) })
             .then(({ data: { text } }) => {
-                console.log("OCR Output:", text); // Log the OCR text for debugging
                 const newReceipt = parseReceipt(text);
-                setReceipts([...receipts, newReceipt]);
+                setReceipts(receipts => [...receipts, newReceipt]);
             })
-            .catch((error) => console.error('Error scanning receipt:', error));
+            .catch(err => console.error('Error processing image:', err));
+    }, []);
+
+    const captureFromWebcam = () => {
+        const imageSrc = webcamRef.current.getScreenshot();
+        fetch(imageSrc)
+            .then((res) => res.blob())
+            .then((blob) => processImage(blob))
+            .catch((error) => console.error('Error capturing webcam image:', error));
     };
 
     const parseReceipt = (text) => {
@@ -137,21 +160,13 @@ function App() {
         };
     };
 
-    const captureFromWebcam = useCallback(() => {
-        const imageSrc = webcamRef.current.getScreenshot();
-        fetch(imageSrc)
-            .then((res) => res.blob())
-            .then((blob) => processImage(blob))
-            .catch((error) => console.error('Error capturing webcam image:', error));
-    }, [webcamRef, processImage]);
-
     return (
         <div>
             <h1>Restaurant Receipt Scanner</h1>
 
             <div>
                 <button onClick={() => setUseWebcam(!useWebcam)}>
-                    {useWebcam ? 'Use File Upload' : 'Use Webcam'}
+                    {useWebcam ? 'Use File Upload' : 'Scan Receipt'}
                 </button>
             </div>
 
