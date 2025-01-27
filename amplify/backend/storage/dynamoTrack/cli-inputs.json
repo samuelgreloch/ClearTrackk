@@ -1,0 +1,14 @@
+{
+  "resourceName": "dynamoTrack",
+  "tableName": "dynamoTrack",
+  "partitionKey": {
+    "fieldName": "vendorName",
+    "fieldType": "string"
+  },
+  "sortKey": {
+    "fieldName": "itemName",
+    "fieldType": "string"
+  },
+  "gsi": [],
+  "triggerFunctions": []
+}

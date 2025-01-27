@@ -1,0 +1,33 @@
+{
+  "dev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-resturant-dev-0defd-authRole",
+      "UnauthRoleArn": "arn:aws:iam::207567801697:role/amplify-resturant-dev-0defd-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::207567801697:role/amplify-resturant-dev-0defd-authRole",
+      "Region": "us-east-2",
+      "DeploymentBucketName": "amplify-resturant-dev-0defd-deployment",
+      "UnauthRoleName": "amplify-resturant-dev-0defd-unauthRole",
+      "StackName": "amplify-resturant-dev-0defd",
+      "StackId": "arn:aws:cloudformation:us-east-2:207567801697:stack/amplify-resturant-dev-0defd/b6835a10-dcce-11ef-8f0b-0281048559e3",
+      "AmplifyAppId": "d3gdzgd3838axp",
+      "APIGatewayAuthURL": "https://s3.amazonaws.com/amplify-resturant-dev-0defd-deployment/amplify-cfn-templates/api/APIGatewayAuthStack.json"
+    },
+    "categories": {
+      "function": {
+        "resturant1801b2b9": {
+          "deploymentBucketName": "amplify-resturant-dev-0defd-deployment",
+          "s3Key": "amplify-builds/resturant1801b2b9-2b594e6e6e6d4d305351-build.zip"
+        }
+      },
+      "auth": {
+        "resturant": {}
+      },
+      "storage": {
+        "dynamoTrack": {}
+      },
+      "api": {
+        "apitrack": {}
+      }
+    }
+  }
+}
