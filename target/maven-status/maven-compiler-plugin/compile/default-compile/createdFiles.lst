@@ -1,0 +1,6 @@
+ClearTrack\frontend\ReceiptImageController.class
+ClearTrack\frontend\ReceiptViewController.class
+ClearTrack\Application.class
+ClearTrack\backend\ReceiptController.class
+ClearTrack\backend\Receipt.class
+ClearTrack\backend\ReceiptRepository.class
